@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "ba183f26a3328caa69cd632313d66515"
+name = "cask-cartel"
+handle = "cask-cartel-1"
+application_url = "https://ul-col-whole-childrens.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "dev-test-checkout-extense.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_checkout_branding_settings,read_checkouts,read_content,read_metaobject_definitions,read_metaobjects,read_payment_customizations,read_products,write_checkout_branding_settings,write_checkouts,write_content,write_metaobject_definitions,write_metaobjects,write_payment_customizations,write_products"
+
+[auth]
+redirect_urls = [
+  "https://ul-col-whole-childrens.trycloudflare.com/auth/callback",
+  "https://ul-col-whole-childrens.trycloudflare.com/auth/shopify/callback",
+  "https://ul-col-whole-childrens.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-04"
+
+[pos]
+embedded = false
