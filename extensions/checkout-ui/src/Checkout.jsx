@@ -1,29 +1,32 @@
-import React, { useEffect, useState, useRef } from "react";
+import "@shopify/ui-extensions/preact";
+import { render } from "preact";
+import { useEffect, useState, useRef } from "preact/hooks";
 import {
-  Grid,
-  reactExtension,
-  Image,
-  Banner,
-  Heading,
-  InlineLayout,
-  BlockStack,
-  Text,
-  Button,
   useCartLines,
   useApplyCartLinesChange,
   useApi,
-  SkeletonImage,
   useStorage,
-} from "@shopify/ui-extensions-react/checkout";
+} from "@shopify/ui-extensions/checkout/preact";
 
-export default reactExtension("purchase.checkout.block.render", () => <App />);
+/**
+ * @typedef {{
+ *   id: string;
+ *   title: string;
+ *   images: { nodes: { url: string }[] };
+ *   variants: { nodes: { id: string; price: { amount: string } }[] };
+ * }} Product
+ */
+
+export default async () => {
+  render(<App />, document.body);
+};
 
 function App() {
   const { query, i18n } = useApi();
   const applyCartLinesChange = useApplyCartLinesChange();
   const lines = useCartLines();
   const storage = useStorage();
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(/** @type {Product | null} */ (null));
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -32,7 +35,7 @@ function App() {
   const [minutes, setMinutes] = useState("03");
   const [seconds, setSeconds] = useState("00");
   const [timerExpired, setTimerExpired] = useState(false);
-  const Ref = useRef(null);
+  const Ref = useRef(/** @type {ReturnType<typeof setInterval> | null} */ (null));
   
   useEffect(() => {
     fetchProduct();
@@ -51,13 +54,13 @@ function App() {
 
   useEffect(() => {
     async function initializeTimer() {
-      const storedEndTime = await storage.read("timerEndTime");
+      const storedEndTime = /** @type {string | null} */ (await storage.read("timerEndTime"));
       if (storedEndTime) {
         const endTime = new Date(storedEndTime);
         const currentTime = new Date();
         
         // Calculate the difference in minutes
-        const diffMinutes = (endTime - currentTime) / (1000 * 60);
+        const diffMinutes = (endTime.getTime() - currentTime.getTime()) / (1000 * 60);
         
         if (diffMinutes <= -10) {
           // If the difference is 1 minute or more, delete the storage and reset the timer
@@ -77,18 +80,20 @@ function App() {
     initializeTimer();
   }, []);
 
+  /** @param {Date} endTime */
   const getTimeRemaining = (endTime) => {
-    const total = Date.parse(endTime) - Date.parse(new Date());
+    const total = Date.parse(String(endTime)) - Date.parse(String(new Date()));
     const seconds = Math.floor((total / 1000) % 60);
     const minutes = Math.floor((total / 1000 / 60) % 60);
     return { total, minutes, seconds };
   };
 
+  /** @param {Date} endTime */
   const startTimer = (endTime) => {
     let { total, minutes, seconds } = getTimeRemaining(endTime);
     if (total >= 0) {
-      setMinutes(minutes > 9 ? minutes : "0" + minutes);
-      setSeconds(seconds > 9 ? seconds : "0" + seconds);
+      setMinutes(minutes > 9 ? String(minutes) : "0" + minutes);
+      setSeconds(seconds > 9 ? String(seconds) : "0" + seconds);
     } else {
       setShowContent(false); // Hide content when timer ends
       setTimerExpired(true); // Set timer expired to true
@@ -98,8 +103,8 @@ function App() {
     const id = setInterval(() => {
       let { total, minutes, seconds } = getTimeRemaining(endTime);
       if (total >= 0) {
-        setMinutes(minutes > 9 ? minutes : "0" + minutes);
-        setSeconds(seconds > 9 ? seconds : "0" + seconds);
+        setMinutes(minutes > 9 ? String(minutes) : "0" + minutes);
+        setSeconds(seconds > 9 ? String(seconds) : "0" + seconds);
       } else {
         setShowContent(false);
         setTimerExpired(true);
@@ -116,6 +121,7 @@ function App() {
     return deadline;
   };
 
+  /** @param {string} variantId */
   async function handleAddToCart(variantId) {
     setAdding(true);
     try {
@@ -152,6 +158,7 @@ function App() {
   async function fetchProduct() {
     setLoading(true);
     try {
+      /** @type {{ data?: { product: Product } }} */
       const { data } = await query(
         `query ($id: ID!) {
           product(id: $id) {
@@ -176,7 +183,7 @@ function App() {
           variables: { id: "gid://shopify/Product/4372932001930" },
         }
       );
-      setProduct(data.product);
+      setProduct(data?.product ?? null);
     } catch (error) {
       console.error(error);
     } finally {
@@ -187,14 +194,16 @@ function App() {
   const lineItem = lines.filter((line) =>
     line.merchandise.product.id.includes("gid://shopify/Product/4372932001930")
   );
-  if (lineItem == false) {
+  if (lineItem.length === 0) {
     if (timerExpired) {
       return (
-        <BlockStack spacing="loose" inlineAlignment={"center"}>
-          <Text emphasis="bold" appearance="critical" size="extraLarge">
-            PROMOTION EXPIRED
-          </Text>
-        </BlockStack>
+        <s-stack gap="large" alignItems="center">
+          <s-heading>
+            <s-text type="strong" tone="critical">
+              PROMOTION EXPIRED
+            </s-text>
+          </s-heading>
+        </s-stack>
       );
     }
   }
@@ -207,7 +216,7 @@ function App() {
     return <LoadingSkeleton />;
   }
 
-  if (!loading && !product) {
+  if (!product) {
     return null;
   }
 
@@ -215,46 +224,46 @@ function App() {
 
   return (
     <>
-      <BlockStack background="subdued" spacing="loose" overflow="visible" >
-        <Grid
-          rows={["auto"]}
-          borderRadius="loose"
+      <s-stack background="subdued" gap="large" overflow="visible">
+        <s-grid
+          gridTemplateColumns="auto"
+          borderRadius="large"
           background="base"
-          inlineAlignment="center"
-          columns={["auto"]}
+          justifyItems="center"
         >
-          <Image source="https://cdn.shopify.com/s/files/1/0682/3139/7624/files/freebie-banner_900x_23aeb9a7-5d72-4526-a52b-1e797926f82e.webp?v=1716961503" />
-        </Grid>
-      </BlockStack>
-      <BlockStack
-        background={"subdued"}
-        padding={['base', 'extraLoose', 'none', 'extraLoose']}
-        spacing="base"
+          <s-image src="https://cdn.shopify.com/s/files/1/0682/3139/7624/files/freebie-banner_900x_23aeb9a7-5d72-4526-a52b-1e797926f82e.webp?v=1716961503" />
+        </s-grid>
+      </s-stack>
+      <s-stack
+        background="subdued"
+        padding="base large-200 none large-200"
+        gap="base"
         overflow="hidden"
       >
-        <Grid
-          rows={["auto"]}
-          borderRadius="loose"
-          padding="loose"
+        <s-grid
+          gridTemplateColumns="auto"
+          borderRadius="large"
+          padding="large"
           background="base"
-          spacing="base"
-          inlineAlignment="center"
-          columns={["auto"]}
+          gap="base"
+          justifyItems="center"
         >
-          <BlockStack inlineAlignment={"center"}>
-            <Text size="extraLarge" >
+          <s-stack alignItems="center">
+            <s-heading>
             When you complete your purchase within:
-            </Text>
-          </BlockStack>
+            </s-heading>
+          </s-stack>
 
-          <BlockStack inlineAlignment={"center"}>
-            <Text size="extraLarge" emphasis="bold">
-              {minutes}:{seconds}
-            </Text>
-          </BlockStack>
-        </Grid>
-      </BlockStack>
-      <BlockStack background="subdued" padding="tight" spacing="loose">
+          <s-stack alignItems="center">
+            <s-heading>
+              <s-text type="strong">
+                {minutes}:{seconds}
+              </s-text>
+            </s-heading>
+          </s-stack>
+        </s-grid>
+      </s-stack>
+      <s-stack background="subdued" padding="small-200" gap="large">
         <ProductOffer
           product={product}
           i18n={i18n}
@@ -264,29 +273,40 @@ function App() {
           isInCart={isInCart}
           productVariantId={productVariantId}
         />
-      </BlockStack>
+      </s-stack>
     </>
   );
 }
 
 function LoadingSkeleton() {
   return (
-    <BlockStack spacing="loose">
-      <Heading level={2}>You might also like</Heading>
-      <BlockStack spacing="loose">
-        <InlineLayout
-          spacing="base"
-          columns={[64, "fill", "auto"]}
-          blockAlignment="center"
+    <s-stack gap="large">
+      <s-heading>You might also like</s-heading>
+      <s-stack gap="large">
+        <s-grid
+          gap="base"
+          gridTemplateColumns="64px 1fr auto"
+          alignItems="center"
         >
-          <SkeletonImage />
-        </InlineLayout>
-      </BlockStack>
-    </BlockStack>
+          <s-skeleton-paragraph />
+        </s-grid>
+      </s-stack>
+    </s-stack>
   );
 }
 
 
+/**
+ * @param {{
+ *   product: Product;
+ *   i18n: { formatCurrency: (amount: number) => string };
+ *   adding: boolean;
+ *   handleAddToCart: (variantId: string) => void;
+ *   showError: boolean;
+ *   isInCart: boolean;
+ *   productVariantId: string;
+ * }} props
+ */
 function ProductOffer({
   product,
   i18n,
@@ -297,57 +317,56 @@ function ProductOffer({
   productVariantId,
 }) {
   const { images, title, variants } = product;
-  const renderPrice = i18n.formatCurrency(variants.nodes[0].price.amount);
+  const renderPrice = i18n.formatCurrency(Number(variants.nodes[0].price.amount));
   const imageUrl =
     images.nodes[0]?.url ??
     "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_medium.png?format=webp&v=1530129081";
 
   return (
-    <BlockStack>
-      <BlockStack inlineAlignment={"center"}>
-        <Text size="extraLarge" emphasis="bold">
-          FREE MINI BOTTLES!
-        </Text>
-      </BlockStack>
-      <BlockStack spacing="extraLoose" minBlockSize={"fill"}>
-        <InlineLayout
-          background={"base"}
-          padding={"loose"}
-          borderRadius={"loose"}
-          borderWidth="base"
-          border={"base"}
-          spacing="base"
-          columns={[85, "fill", "auto"]}
-          blockAlignment="center"
+    <s-stack>
+      <s-stack alignItems="center">
+        <s-heading>
+          <s-text type="strong">FREE MINI BOTTLES!</s-text>
+        </s-heading>
+      </s-stack>
+      <s-stack gap="large-200" minBlockSize="100%">
+        <s-grid
+          background="base"
+          padding="large"
+          borderRadius="large"
+          border="base"
+          gap="base"
+          gridTemplateColumns="85px 1fr auto"
+          alignItems="center"
         >
-          <Image
-            source={imageUrl}
-            description={title}
-            aspectRatio={1}
+          <s-image
+            src={imageUrl}
+            alt={title}
+            aspectRatio="1"
           />
-          <BlockStack spacing="none" inlineAlignment={"center"} >
-            <Text size="large" emphasis="bold" >
+          <s-stack gap="none" alignItems="center">
+            <s-text type="strong">
               BONUS GIFT
-            </Text>
-            {/* <Text appearance="subdued">{renderPrice}</Text> */}
-          </BlockStack>
-          <Button
+            </s-text>
+            {/* <s-text color="subdued">{renderPrice}</s-text> */}
+          </s-stack>
+          <s-button
             loading={adding}
-            onPress={() => handleAddToCart(productVariantId)}
+            onClick={() => handleAddToCart(productVariantId)}
           >
             {isInCart ? "In Cart" : "+ Add Gift"}
-          </Button>
-        </InlineLayout>
-      </BlockStack>
+          </s-button>
+        </s-grid>
+      </s-stack>
       {showError && <ErrorBanner />}
-    </BlockStack>
+    </s-stack>
   );
 }
 
 function ErrorBanner() {
   return (
-    <Banner status="critical">
+    <s-banner tone="critical">
       There was an issue adding this product. Please try again.
-    </Banner>
+    </s-banner>
   );
 }

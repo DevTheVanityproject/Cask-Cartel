@@ -1,19 +1,10 @@
-import {
-  reactExtension,
-  Divider,
-  BlockSpacer,
-} from '@shopify/ui-extensions-react/checkout';
+import '@shopify/ui-extensions/preact';
+import { render } from 'preact';
 
-
-export default reactExtension(
-  'purchase.checkout.block.render',
-  () => <Extension />,
-);
+export default async () => {
+  render(<Extension />, document.body);
+};
 
 function Extension() {
-  return (
-    <>
-      <Divider />
-    </>
-  );
+  return <s-divider />;
 }

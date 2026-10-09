@@ -1,25 +1,29 @@
+import '@shopify/ui-extensions/preact';
+import { render } from 'preact';
+import { useState } from 'preact/hooks';
 import {
-  reactExtension,
-  TextField,
-  useApplyAttributeChange,
   useBuyerJourneyIntercept,
   useShippingAddress,
-  Text,
-  BlockStack
-} from '@shopify/ui-extensions-react/checkout';
-import { useState } from 'react';
+} from '@shopify/ui-extensions/checkout/preact';
 
-export default reactExtension('purchase.checkout.block.render', () => <Extension />);
+export default async () => {
+  render(<Extension />, document.body);
+};
 
 function Extension() {
   const [selectedDate, setSelectedDate] = useState('');
   const [validationError, setValidationError] = useState('');
-  const applyAttributeChange = useApplyAttributeChange();
-  const { countryCode } = useShippingAddress();
+  const { countryCode } = useShippingAddress() ?? {};
   const ageLimit = countryCode === 'US' ? 21 : 18;
 
   useBuyerJourneyIntercept(intercept);
 
+  // Kept as before: the age-check result returns `allow` (with a reason/errors), so the
+  // object does not match the strict `InterceptorRequest` union; typed loosely on purpose.
+  /**
+   * @param {{ canBlockProgress: boolean }} options
+   * @returns {any}
+   */
   function intercept({ canBlockProgress }) {
     if (canBlockProgress) {
       const isOldEnough = checkAge(selectedDate);
@@ -47,6 +51,7 @@ function Extension() {
     };
   }
 
+  /** @param {string} newDate */
   const handleDateChange = (newDate) => {
     if (isValidDateFormat(newDate)) {
       setSelectedDate(newDate);
@@ -54,7 +59,7 @@ function Extension() {
 
       if (isOldEnough) {
         setValidationError('');
-        applyAttributeChange({
+        shopify.applyAttributeChange({
           type: 'updateAttribute',
           key: 'Birth Date',
           value: newDate,
@@ -69,11 +74,13 @@ function Extension() {
     }
   };
 
+  /** @param {string} date */
   function isValidDateFormat(date) {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     return regex.test(date);
   }
 
+  /** @param {string} date */
   function checkAge(date) {
     const currentDate = new Date();
     const selectedDateObj = new Date(date);
@@ -82,8 +89,8 @@ function Extension() {
     const monthDiff = currentDate.getMonth() - selectedDateObj.getMonth();
     const dayDiff = currentDate.getDate() - selectedDateObj.getDate();
 
-    const isOldEnough = (ageDiff > ageLimit) || 
-                        (ageDiff === ageLimit && monthDiff > 0) || 
+    const isOldEnough = (ageDiff > ageLimit) ||
+                        (ageDiff === ageLimit && monthDiff > 0) ||
                         (ageDiff === ageLimit && monthDiff === 0 && dayDiff > 0);
 
     return isOldEnough;
@@ -95,17 +102,17 @@ function Extension() {
 
   return (
 <>
-      <BlockStack>
-      <TextField
+      <s-stack>
+      <s-text-field
         label="Birth Date [YYYY-MM-DD]"
         value={selectedDate}
-        onChange={(value) => handleDateChange(value)}
+        onChange={(event) => handleDateChange(/** @type {HTMLInputElement} */ (event.currentTarget).value)}
         error={validationError}
       />
-      </BlockStack>
-    <BlockStack padding={'tight'}>
-       <Text> Enter your date of birth to confirm you are over the legal age of <Text emphasis='bold'>{ageLimit}</Text> to purchase alcohol in your location.</Text>
-    </BlockStack>
+      </s-stack>
+    <s-stack padding="small-200">
+       <s-text> Enter your date of birth to confirm you are over the legal age of <s-text type="strong">{ageLimit}</s-text> to purchase alcohol in your location.</s-text>
+    </s-stack>
 </>
   );
 }

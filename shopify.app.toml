@@ -3,13 +3,12 @@
 client_id = "ba183f26a3328caa69cd632313d66515"
 name = "cask-cartel"
 handle = "cask-cartel-1"
-application_url = "https://ul-col-whole-childrens.trycloudflare.com"
+application_url = "https://competing-folding-smaller-engineering.trycloudflare.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
 dev_store_url = "dev-test-checkout-extense.myshopify.com"
-include_config_on_deploy = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -17,13 +16,13 @@ scopes = "read_checkout_branding_settings,read_checkouts,read_content,read_metao
 
 [auth]
 redirect_urls = [
-  "https://ul-col-whole-childrens.trycloudflare.com/auth/callback",
-  "https://ul-col-whole-childrens.trycloudflare.com/auth/shopify/callback",
-  "https://ul-col-whole-childrens.trycloudflare.com/api/auth/callback"
+  "https://competing-folding-smaller-engineering.trycloudflare.com/auth/callback",
+  "https://competing-folding-smaller-engineering.trycloudflare.com/auth/shopify/callback",
+  "https://competing-folding-smaller-engineering.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
-api_version = "2024-04"
+api_version = "2026-07"
 
 [pos]
 embedded = false

@@ -3,11 +3,12 @@
 
 # The version of APIs your extension will receive. Learn more:
 # https://shopify.dev/docs/api/usage/versioning
-api_version = "2024-04"
+api_version = "2026-07"
 
 [[extensions]]
 name = "email marketing"
 handle = "email-marketing"
+uid = "b26ec287-8161-94a4-e8bc-4a39f91c1ad68174ace1"
 type = "ui_extension"
 
 

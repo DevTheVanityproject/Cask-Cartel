@@ -3,12 +3,13 @@
 
 # The version of APIs your extension will receive. Learn more:
 # https://shopify.dev/docs/api/usage/versioning
-api_version = "2024-04"
+api_version = "2026-07"
 
 [[extensions]]
 type = "ui_extension"
 name = "OderSummeryDividerFirst"
 handle = "odersummerydividerfirst"
+uid = "f9e8d26d-b744-fda8-e9d3-66b858f6138d12f567b6"
 
 # Controls where in Shopify your extension will be injected,
 # and the file that contains your extension’s source code. Learn more:

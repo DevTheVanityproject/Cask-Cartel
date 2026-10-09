@@ -3,12 +3,13 @@
 
 # The version of APIs your extension will receive. Learn more:
 # https://shopify.dev/docs/api/usage/versioning
-api_version = "2024-04"
+api_version = "2026-07"
 
 [[extensions]]
 type = "ui_extension"
 name = "Birth Date Validtion "
 handle = "birth-date-validtion"
+uid = "82392400-2ccb-b4b8-c8bc-b75700e62c4877fe0b40"
 
 # Controls where in Shopify your extension will be injected,
 # and the file that contains your extension’s source code. Learn more:

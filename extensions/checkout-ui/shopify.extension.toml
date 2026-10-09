@@ -3,12 +3,13 @@
 
 # The version of APIs your extension will receive. Learn more:
 # https://shopify.dev/docs/api/usage/versioning
-api_version = "2024-04"
+api_version = "2026-07"
 
 [[extensions]]
 type = "ui_extension"
 name = "checkout-ui"
 handle = "checkout-ui"
+uid = "fddfc370-27c7-c30f-4ee0-a927194e2accadefd40c"
 
 # Controls where in Shopify your extension will be injected,
 # and the file that contains your extension’s source code. Learn more:
